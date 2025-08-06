@@ -20,24 +20,39 @@ namespace MatchGame
         DispatcherTimer timer = new DispatcherTimer();
         int tenthsOfSecondsElapsed;
         int matchesFound;
+        int record = int.MaxValue; // Começa com o maior valor possível
+
         public MainWindow()
         {
             InitializeComponent();
             timer.Interval = TimeSpan.FromSeconds(.1);
             timer.Tick += Timer_Tick;
-
             SetUpGame();
+            UpdateRecordText();
+        }
 
+        private void UpdateRecordText()
+        {
+            if (record == int.MaxValue)
+                recordTextBlock.Text = "Recorde: --";
+            else
+                recordTextBlock.Text = $"Recorde: {(record / 10F):0.0}s";
         }
 
         private void Timer_Tick(object? sender, EventArgs e)
         {
             tenthsOfSecondsElapsed++;
             timeTextBlock.Text = (tenthsOfSecondsElapsed / 10F).ToString("0.0s");
+
             if (matchesFound == 8)
             {
                 timer.Stop();
-                timeTextBlock.Text = timeTextBlock.Text + " - Click HERE to Play Again";
+                if (tenthsOfSecondsElapsed < record)
+                {
+                    record = tenthsOfSecondsElapsed;
+                    UpdateRecordText();
+                }
+                timeTextBlock.Text = timeTextBlock.Text + " - RESTART";
             }
         }
 
@@ -49,10 +64,10 @@ namespace MatchGame
                 "🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼"
             };
             Random random = new Random();
-            
+
             foreach (TextBlock textBlock in mainGrid.Children.OfType<TextBlock>())
             {
-                if (textBlock.Name != "timeTextBlock")
+                if (textBlock.Name != "timeTextBlock" && textBlock.Name != "recordTextBlock")
                 {
                     textBlock.Visibility = Visibility.Visible;
                     int index = random.Next(animalEmoji.Count);
@@ -64,6 +79,7 @@ namespace MatchGame
             timer.Start();
             tenthsOfSecondsElapsed = 0;
             matchesFound = 0;
+            UpdateRecordText();
         }
 
         TextBlock lastTextBlockClicked;
@@ -94,7 +110,7 @@ namespace MatchGame
         {
             if (matchesFound == 8)
             {
-                SetUpGame();                
+                SetUpGame();
             }
         }
     }
